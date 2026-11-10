@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>For NS</title>
+<meta name="theme-color" content="#1b0e1c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Outfit:wght@300;400;500&display=swap">
+<style>
+/* Layout: one screen at a time, centered on a night-rose sky with drifting petals; the camera is a glowing oval mirror. */
+:root{
+  --night:#1b0e1c;
+  --plum:#2d1630;
+  --rose:#ff9bb3;
+  --blush:#ffd6de;
+  --gold:#f3cf96;
+  --ink:#fbeef1;
+  --muted:#c9a9b3;
+  --script:"Pinyon Script","Snell Roundhand","Brush Script MT",cursive;
+  --serif:"Cormorant Garamond","Iowan Old Style",Georgia,serif;
+  --sans:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{
+  background:radial-gradient(120% 80% at 50% 0%,var(--plum) 0%,var(--night) 60%) fixed,var(--night);
+  color:var(--ink);font-family:var(--sans);font-weight:300;
+  overflow:hidden;-webkit-tap-highlight-color:transparent;
+}
+#petals{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.screen{
+  position:fixed;inset:0;z-index:1;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:22px;
+  text-align:center;
+  padding-block:max(24px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-bottom,0px));
+  padding-left:max(20px,env(safe-area-inset-left,0px));
+  padding-right:max(20px,env(safe-area-inset-right,0px));
+  opacity:0;visibility:hidden;transform:translateY(14px);
+  transition:opacity 1s ease,transform 1s ease,visibility 0s linear 1s;
+  overflow-y:auto;
+}
+.screen > :first-child{margin-top:auto}
+.screen > :last-child{margin-bottom:auto}
+.screen.on{opacity:1;visibility:visible;transform:none;transition:opacity 1.1s ease,transform 1.1s ease,visibility 0s}
+.hi{font-family:var(--script);font-size:clamp(64px,20vw,120px);line-height:1;color:var(--blush);margin:0;
+  text-shadow:0 0 30px rgba(255,155,179,.45)}
+.hi span{color:var(--gold)}
+.lede{font-family:var(--serif);font-style:italic;font-size:clamp(21px,5.6vw,28px);line-height:1.4;max-width:24ch;margin:0;color:var(--ink);text-wrap:balance}
+.q{font-family:var(--serif);font-size:clamp(30px,8.4vw,46px);line-height:1.15;max-width:15ch;margin:0;font-weight:500;text-wrap:balance}
+.q em{color:var(--rose);font-style:italic}
+.small{font-size:13px;color:var(--muted);max-width:30ch;line-height:1.5;margin:0;letter-spacing:.01em}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+button,.btn{
+  font:500 16px/1 var(--sans);letter-spacing:.04em;color:var(--night);
+  background:linear-gradient(135deg,var(--blush),var(--rose));
+  border:0;border-radius:999px;padding:16px 28px;cursor:pointer;text-decoration:none;display:inline-block;
+  box-shadow:0 10px 30px -8px rgba(255,155,179,.6);transition:transform .2s ease,box-shadow .2s ease;
+}
+button:active,.btn:active{transform:scale(.96)}
+button.ghost,.btn.ghost{background:transparent;color:var(--blush);box-shadow:inset 0 0 0 1px rgba(255,214,222,.45)}
+button:focus-visible,.btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.pulse{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 10px 30px -8px rgba(255,155,179,.6)}50%{box-shadow:0 10px 44px -2px rgba(255,155,179,.95)}}
+
+/* the mirror */
+.mirror-wrap{position:relative;width:min(78vw,340px);aspect-ratio:3/4;max-width:100%;flex:none}
+.mirror{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:#140a14;
+  box-shadow:0 0 0 2px var(--gold),0 0 0 9px rgba(243,207,150,.12),0 0 60px 6px rgba(255,155,179,.45)}
+.mirror video,.mirror img{width:100%;height:100%;object-fit:cover;display:block}
+.mirror video{transform:scaleX(-1)}
+.mirror .glow{position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,transparent 70%,rgba(27,14,28,.55) 100%)}
+.flash{position:absolute;inset:0;border-radius:50%;background:#fff;opacity:0;pointer-events:none}
+.flash.go{animation:flash .6s ease-out}
+@keyframes flash{0%{opacity:.85}100%{opacity:0}}
+.orbit{position:absolute;inset:-26px;pointer-events:none;animation:spin 28s linear infinite}
+.orbit i{position:absolute;left:50%;top:50%;font-style:normal;color:var(--rose);font-size:16px;opacity:.85}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;border-radius:50%}
+.fallback p{font-family:var(--serif);font-style:italic;font-size:20px;margin:0;line-height:1.35}
+
+.caption{min-height:3.2em;display:flex;align-items:center;justify-content:center;max-width:22ch}
+.caption p{font-family:var(--serif);font-size:clamp(25px,7vw,34px);line-height:1.2;margin:0;font-weight:500;text-wrap:balance;
+  opacity:0;transform:translateY(8px);transition:opacity .9s ease,transform .9s ease}
+.caption p.show{opacity:1;transform:none}
+.caption p em{color:var(--rose)}
+.caption p .script{font-family:var(--script);font-weight:400;font-size:1.35em;color:var(--gold)}
+.actions{opacity:0;transition:opacity 1s ease;pointer-events:none}
+.actions.show{opacity:1;pointer-events:auto}
+
+/* the note */
+.letter{width:min(100%,460px);text-align:left;display:flex;flex-direction:column;gap:14px;
+  font-family:var(--serif);font-size:clamp(19px,4.9vw,22px);line-height:1.55;color:var(--ink)}
+.letter p{margin:0}
+.letter .to{font-family:var(--script);font-size:46px;line-height:1;color:var(--gold)}
+.letter .sign{font-family:var(--script);font-size:40px;line-height:1.1;color:var(--blush);text-align:right;margin-top:4px}
+.letter .sign small{display:block;font-family:var(--serif);font-style:italic;font-size:18px;color:var(--muted)}
+.polaroid{background:#fff8f5;padding:10px 10px 34px;border-radius:4px;transform:rotate(-3deg);
+  box-shadow:0 18px 40px -10px rgba(0,0,0,.6);width:min(52vw,190px);flex:none;position:relative}
+.polaroid img{width:100%;aspect-ratio:1;object-fit:cover;display:block;border-radius:2px}
+.polaroid span{position:absolute;bottom:7px;left:0;right:0;text-align:center;font-family:var(--script);font-size:22px;color:#8a3a52}
+.note-top{display:flex;flex-direction:column;align-items:center;gap:16px}
+.heart{font-size:22px;color:var(--rose)}
+@media (prefers-reduced-motion:reduce){
+  .screen,.screen.on,.caption p{transition:opacity .4s ease}
+  .orbit,.pulse{animation:none}
+}
+</style>
+</head>
+<body>
+<canvas id="petals" aria-hidden="true"></canvas>
+
+<!-- 1 · hello -->
+<section class="screen on" id="s1" aria-live="polite">
+  <h1 class="hi">Hi <span id="herName">NS</span></h1>
+  <p class="lede">I made something small, just for you.</p>
+  <button class="pulse" id="toAsk">Open it</button>
+</section>
+
+<!-- 2 · the question -->
+<section class="screen" id="s2">
+  <p class="q">Do you want to see <em>the girl I love?</em></p>
+  <div class="row">
+    <button id="yes1">Yes, show me</button>
+    <button class="ghost" id="yes2">Hmm… okay, yes</button>
+  </div>
+</section>
+
+<!-- 3 · the mirror -->
+<section class="screen" id="s3">
+  <div class="mirror-wrap">
+    <div class="orbit" id="orbit" aria-hidden="true"></div>
+    <div class="mirror">
+      <video id="cam" playsinline muted autoplay hidden></video>
+      <img id="still" alt="You" hidden>
+      <div class="fallback" id="fallback" hidden>
+        <p id="fbText">Tap “Allow” so I can show you</p>
+        <button id="retry">Show me</button>
+      </div>
+      <div class="glow"></div>
+      <div class="flash" id="flash"></div>
+    </div>
+  </div>
+  <div class="caption"><p id="cap"></p></div>
+  <div class="row actions" id="camActions">
+    <button id="keep">Keep this smile</button>
+    <button class="ghost" id="toNote">One more thing →</button>
+  </div>
+</section>
+
+<!-- 4 · the note -->
+<section class="screen" id="s4">
+  <div class="note-top">
+    <div class="polaroid" id="polaroid" hidden><img id="polaImg" alt="Your smile"><span>my favourite view</span></div>
+    <div class="heart" aria-hidden="true">♥</div>
+  </div>
+  <div class="letter">
+    <p class="to" id="toName">NS,</p>
+    <p>Some people walk into your life and quietly make everything softer. You did that for me.</p>
+    <p>I love the way you laugh, the way you care about people, and the way an ordinary day turns into something I want to remember, just because you were in it.</p>
+    <p>What you saw a moment ago is exactly what I see every time I think of you. Precious. Kind. The prettiest smile I know.</p>
+    <p>Thank you for being you.</p>
+    <p class="sign"><small>Happy Valentine’s, always yours,</small><span id="fromName">Navneet</span></p>
+  </div>
+  <div class="row">
+    <a class="btn ghost" id="saveLink" hidden download="my-smile.jpg">Save your photo</a>
+    <button class="ghost" id="again">See her again ♥</button>
+  </div>
+</section>
+
+<script>
+/* ===== Edit these two names if you like ===== */
+const HER_NAME  = "NS";
+const FROM_NAME = "Navneet";
+/* ============================================ */
+
+const $ = id => document.getElementById(id);
+$("herName").textContent = HER_NAME;
+$("toName").textContent = HER_NAME + ",";
+$("fromName").textContent = FROM_NAME;
+
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---- drifting petals & tiny hearts ---- */
+(() => {
+  const c = $("petals"), x = c.getContext("2d");
+  let W, H, dpr, parts = [];
+  const N = reduce ? 0 : 34;
+  function size(){ dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
+    c.width = W*dpr; c.height = H*dpr; x.setTransform(dpr,0,0,dpr,0,0); }
+  function make(init){ return { x: Math.random()*W, y: init ? Math.random()*H : -20,
+    r: 4 + Math.random()*7, vy: .25 + Math.random()*.55, vx: -.2 + Math.random()*.4,
+    rot: Math.random()*6.28, vr: -.01 + Math.random()*.02, sway: Math.random()*6.28,
+    heart: Math.random() < .3, a: .25 + Math.random()*.5,
+    col: ["255,155,179","255,214,222","243,207,150"][Math.floor(Math.random()*3)] }; }
+  function petal(p){ x.beginPath(); x.ellipse(0,0,p.r,p.r*.55,0,0,6.28); x.fill(); }
+  function heart(p){ const s = p.r/6; x.beginPath(); x.moveTo(0,3*s);
+    x.bezierCurveTo(-7*s,-2*s,-3*s,-8*s,0,-4*s); x.bezierCurveTo(3*s,-8*s,7*s,-2*s,0,3*s); x.fill(); }
+  function tick(){ x.clearRect(0,0,W,H);
+    for (const p of parts){ p.sway += .015; p.y += p.vy; p.x += p.vx + Math.sin(p.sway)*.35; p.rot += p.vr;
+      if (p.y > H+20) Object.assign(p, make(false));
+      x.save(); x.translate(p.x,p.y); x.rotate(p.rot); x.fillStyle = `rgba(${p.col},${p.a})`;
+      p.heart ? heart(p) : petal(p); x.restore(); }
+    requestAnimationFrame(tick); }
+  size(); addEventListener("resize", size);
+  for (let i=0;i<N;i++) parts.push(make(true));
+  if (N) tick();
+})();
+
+/* orbiting hearts around the mirror */
+(() => { const o = $("orbit"); const n = 14;
+  for (let i=0;i<n;i++){ const h = document.createElement("i"); h.textContent = "♥";
+    const a = i/n*360; h.style.transform = `translate(-50%,-50%) rotate(${a}deg) translateY(calc(-1 * min(43vw,190px))) rotate(${-a}deg)`;
+    h.style.fontSize = (10 + (i%3)*4) + "px"; o.appendChild(h); } })();
+
+/* ---- screen flow ---- */
+let current = "s1";
+function show(id){ $(current).classList.remove("on"); $(id).classList.add("on"); current = id; }
+$("toAsk").onclick = () => show("s2");
+
+let stream = null, captionsRun = false, snapshot = null;
+async function openMirror(){
+  if (current !== "s3") show("s3");
+  try {
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+      $("fbText").textContent = "Please open this from the link I sent you";
+      throw new Error("insecure");
+    }
+    $("fallback").hidden = true;
+    const waitTimer = setTimeout(() => { if (!stream) $("fallback").hidden = false; }, 6000);
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 1280 } }, audio: false });
+    clearTimeout(waitTimer);
+    $("fallback").hidden = true;
+    const v = $("cam"); v.srcObject = stream; v.hidden = false;
+    await v.play().catch(()=>{});
+    setTimeout(runCaptions, 900);
+  } catch (e) {
+    $("fallback").hidden = false;
+  }
+}
+$("yes1").onclick = openMirror;
+$("yes2").onclick = openMirror;
+
+/* if the camera was not allowed, ask gently and try again in the page */
+let tries = 0;
+$("retry").onclick = async () => {
+  tries++;
+  $("fallback").hidden = true;
+  await openMirror();
+  if (!stream && tries >= 1) $("fbText").textContent = "Please allow the camera for this page in your browser settings, then tap again";
+};
+
+const lines = [
+  "There she is.",
+  "Now… <em>smile</em> for me.",
+  "See? The prettiest smile in the whole world.",
+  "Precious. Kind. Beautiful.",
+  "That’s the girl I love, <span class='script'>" + HER_NAME + "</span>."
+];
+function runCaptions(){
+  if (captionsRun) return; captionsRun = true;
+  const p = $("cap"); let i = 0;
+  const step = () => {
+    p.classList.remove("show");
+    setTimeout(() => {
+      p.innerHTML = lines[i]; p.classList.add("show"); i++;
+      if (i < lines.length) setTimeout(step, i === 2 ? 3400 : 2800);
+      else setTimeout(() => $("camActions").classList.add("show"), 1600);
+    }, 500);
+  };
+  step();
+}
+
+/* freeze a square snapshot */
+function grab(src, w, h, mirror){
+  const s = Math.min(w,h), c = document.createElement("canvas"); c.width = c.height = Math.min(s, 900);
+  const g = c.getContext("2d");
+  if (mirror){ g.translate(c.width,0); g.scale(-1,1); }
+  g.drawImage(src, (w-s)/2, (h-s)/2, s, s, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", .9);
+}
+function snapshotFromImg(img){ snapshot = grab(img, img.naturalWidth, img.naturalHeight, false); }
+$("keep").onclick = () => {
+  const v = $("cam");
+  if (stream && v.videoWidth){ snapshot = grab(v, v.videoWidth, v.videoHeight, true); }
+  const f = $("flash"); f.classList.remove("go"); void f.offsetWidth; f.classList.add("go");
+  $("keep").textContent = "Kept ♥";
+  setTimeout(goNote, 900);
+};
+function stopCam(){ if (stream){ stream.getTracks().forEach(t => t.stop()); stream = null; } }
+function goNote(){
+  if (!snapshot && stream && $("cam").videoWidth){ const v = $("cam"); snapshot = grab(v, v.videoWidth, v.videoHeight, true); }
+  stopCam();
+  if (snapshot){ $("polaImg").src = snapshot; $("polaroid").hidden = false;
+    const a = $("saveLink"); a.href = snapshot; a.hidden = false; }
+  show("s4");
+}
+$("toNote").onclick = goNote;
+$("again").onclick = () => {
+  captionsRun = false; $("cap").classList.remove("show"); $("camActions").classList.remove("show");
+  $("keep").textContent = "Keep this smile"; $("cam").hidden = true; $("still").hidden = true;
+  openMirror();
+};
+addEventListener("pagehide", stopCam);
+</script>
+</body>
+</html>
